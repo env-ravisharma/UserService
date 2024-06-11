@@ -1,5 +1,6 @@
 package com.pp.user.service.UserService.entities;
 
+import com.pp.user.service.UserService.services.impl.Hotel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,6 @@ public class Rating {
     private String hotelId;
     private String rating;
     private String feedback;
+    private Hotel hotel;
 
 }
