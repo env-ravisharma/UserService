@@ -3,6 +3,8 @@ package com.pp.user.service.UserService.controllers;
 import com.pp.user.service.UserService.entities.User;
 import com.pp.user.service.UserService.services.UserService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(user1);
     }
 
+    int retryCount = 1;
+
     @GetMapping("/{userId}")
-    @CircuitBreaker(name = "ratingHotelBreaker", fallbackMethod = "ratingHotelFallback")
+//    @CircuitBreaker(name = "ratingHotelBreaker", fallbackMethod = "ratingHotelFallback")
+//    @Retry(name = "ratingHotelService", fallbackMethod = "ratingHotelFallback")
+    @RateLimiter(name = "userRateLimiter", fallbackMethod = "ratingHotelFallback")
     public ResponseEntity<User> getSingleUser(@PathVariable String userId){
+        logger.info("Retry count: {}", retryCount);
         User user = userService.getUser(userId);
         return ResponseEntity.ok(user);
     }
@@ -39,7 +46,7 @@ public class UserController {
         User user = User.builder()
                 .email("dummy@gmail.com")
                 .name("Dummy")
-                .about("This use is created dummy because some services is down")
+                .about("This user is created dummy because some services is down")
                 .userId("141234")
                 .build();
         return new ResponseEntity<>(user, HttpStatus.OK);
